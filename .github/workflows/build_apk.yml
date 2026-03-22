@@ -3,73 +3,60 @@ name: Build CENAD APK
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:   # permet de lancer manuellement depuis GitHub
+  workflow_dispatch:
 
 jobs:
   build-apk:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
-      # 1. Récupérer le code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Python 3.10
       - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # 3. Dépendances système Ubuntu
       - name: Install system dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y \
-            git zip unzip \
-            openjdk-17-jdk \
-            autoconf libtool pkg-config \
-            zlib1g-dev libncurses5-dev libncursesw5-dev \
-            cmake libffi-dev libssl-dev \
-            build-essential ccache
+          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev cmake libffi-dev libssl-dev build-essential ccache
 
-      # 4. Cache Buildozer (.buildozer et ~/.gradle)
-      - name: Cache buildozer global
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer
-            ~/.gradle
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-${{ runner.os }}-
-
-      # 5. Installer Buildozer + Cython
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
-          pip install buildozer cython==0.29.33
+          pip install buildozer==1.5.0 cython==0.29.33
 
-      # 6. Build APK debug
-      - name: Build APK (debug)
+      - name: Cache buildozer
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+
+      - name: Build APK
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-        run: |
-          buildozer -v android debug 2>&1 | tee build.log
+        run: buildozer -v android debug 2>&1 | tee build.log
 
-      # 7. Publier l'APK comme artefact téléchargeable
-      - name: Upload APK artifact
+      - name: Find APK
+        if: always()
+        run: |
+          find . -name "*.apk" 2>/dev/null || echo "Aucun APK"
+          ls -la bin/ 2>/dev/null || echo "bin/ absent"
+          tail -80 build.log
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: cenad-debug-apk
           path: bin/*.apk
+          if-no-files-found: warn
           retention-days: 30
 
-      # 8. Publier le log en cas d'erreur
-      - name: Upload build log on failure
-        if: failure()
+      - name: Upload log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
