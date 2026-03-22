@@ -37,15 +37,53 @@ def get_downloads_dir():
     return os.path.expanduser('~/Downloads')
 
 def open_phone(number):
+    """Ouvre l'application Telephone du systeme."""
+    number = number.strip().replace(' ', '')
     if platform == 'android':
         try:
-            from android import activity
             from jnius import autoclass
+            PythonActivity = autoclass('org.kivy.android.PythonActivity')
             Intent = autoclass('android.content.Intent')
             Uri = autoclass('android.net.Uri')
             intent = Intent(Intent.ACTION_DIAL)
             intent.setData(Uri.parse('tel:' + number))
-            activity.startActivity(intent)
+            PythonActivity.mActivity.startActivity(intent)
+        except Exception:
+            try:
+                import webbrowser
+                webbrowser.open('tel:' + number)
+            except Exception:
+                pass
+    else:
+        try:
+            import webbrowser
+            webbrowser.open('tel:' + number)
+        except Exception:
+            pass
+
+
+def open_sms(number):
+    """Ouvre l'application SMS du systeme."""
+    number = number.strip().replace(' ', '')
+    if platform == 'android':
+        try:
+            from jnius import autoclass
+            PythonActivity = autoclass('org.kivy.android.PythonActivity')
+            Intent = autoclass('android.content.Intent')
+            Uri = autoclass('android.net.Uri')
+            intent = Intent(Intent.ACTION_SENDTO)
+            intent.setData(Uri.parse('smsto:' + number))
+            PythonActivity.mActivity.startActivity(intent)
+        except Exception:
+            try:
+                import webbrowser
+                webbrowser.open('sms:' + number)
+            except Exception:
+                pass
+    else:
+        try:
+            import webbrowser
+            webbrowser.open('sms:' + number)
         except Exception:
             pass
 
@@ -334,17 +372,7 @@ class DashboardScreen(Screen):
                 open_phone(telephone)
             def do_sms(*a):
                 popup.dismiss()
-                if platform == 'android':
-                    try:
-                        from android import activity
-                        from jnius import autoclass
-                        Intent = autoclass('android.content.Intent')
-                        Uri = autoclass('android.net.Uri')
-                        intent = Intent(Intent.ACTION_VIEW)
-                        intent.setData(Uri.parse('sms:' + telephone))
-                        activity.startActivity(intent)
-                    except Exception:
-                        pass
+                open_sms(telephone)
             btn_appel.bind(on_release=do_call)
             btn_sms.bind(on_release=do_sms)
             btn_row.add_widget(btn_appel)
