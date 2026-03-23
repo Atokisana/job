@@ -29,16 +29,10 @@ jobs:
           pip install --upgrade pip
           pip install buildozer==1.5.0 cython==0.29.33
 
-      - name: Verify logo exists
-        run: |
-          ls -la assets/logo.png
-          echo "Logo OK"
-
-      - name: Build APK sans cache
+      - name: Build APK
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
         run: |
-          buildozer android clean
           buildozer -v android debug 2>&1 | tee build.log
 
       - name: Find APK
