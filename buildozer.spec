@@ -12,7 +12,7 @@ requirements = python3,kivy==2.3.0,sqlite3,pillow,android
 orientation = portrait
 
 # ICONE APK - placez logo.png 512x512px dans assets/
-icon.filename = %(source.dir)s/assets/logo.png
+# icon.filename = %(source.dir)s/assets/logo.png
 
 # SPLASH - decommenter si voulu
 # presplash.filename = %(source.dir)s/assets/logo.png
