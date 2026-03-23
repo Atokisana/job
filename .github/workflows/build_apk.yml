@@ -29,25 +29,22 @@ jobs:
           pip install --upgrade pip
           pip install buildozer==1.5.0 cython==0.29.33
 
-      - name: Cache buildozer
-        uses: actions/cache@v4
-        with:
-          path: ~/.buildozer
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
-
       - name: Build APK
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-        run: buildozer -v android debug 2>&1 | tee build.log
+        run: |
+          buildozer android clean
+          buildozer -v android debug 2>&1 | tee build.log
 
       - name: Find APK
         if: always()
         run: |
           find . -name "*.apk" 2>/dev/null || echo "Aucun APK"
           ls -la bin/ 2>/dev/null || echo "bin/ absent"
-          tail -80 build.log
+          grep -i "error\|failed" build.log | tail -20
 
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cenad-debug-apk
