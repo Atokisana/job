@@ -6,29 +6,22 @@ source.dir = .
 source.include_exts = py,png,jpg,jpeg,kv,atlas,db,csv
 version = 1.0.0
 
-# Sans pandas/numpy/matplotlib/scipy
-requirements = python3,kivy==2.3.0,sqlite3,pillow,android
+requirements = python3,kivy==2.3.0,pillow,sqlite3,android
 
 orientation = portrait
+fullscreen = 0
 
-# ICONE APK - placez logo.png 512x512px dans assets/
-# icon.filename = %(source.dir)s/assets/logo.png
+icon.filename = %(source.dir)s/assets/logo.png
+presplash.filename = %(source.dir)s/assets/logo.png
 
-# SPLASH - decommenter si voulu
-# presplash.filename = %(source.dir)s/assets/logo.png
-
-# PERMISSIONS ANDROID
-android.permissions = READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,CALL_PHONE,SEND_SMS,INTERNET
-
-# SDK
+android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,CALL_PHONE,SEND_SMS
 android.minapi = 21
 android.api = 33
 android.ndk = 25b
-android.sdk = 33
 android.archs = arm64-v8a, armeabi-v7a
-
 android.allow_backup = True
 android.accept_sdk_license = True
+android.logcat_filters = *:S python:D
 
 [buildozer]
 log_level = 2
